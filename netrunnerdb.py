@@ -11,20 +11,47 @@ NRDB_CARD_URL_PREFIX = 'https://netrunnerdb.com/en/card/'
 
 class Cards:
     def __init__(self):
+        mwls = self.load_data('mwl')['data']
+        for mwl in mwls:
+            if mwl.get('active'):
+                self.active_mwl = mwl
+                break
+        self.packs = {x['code']: x for x in self.load_data('packs')['data']}
+        self.cycles = {x['code']: x for x in self.load_data('cycles')['data']}
+        cards_data = self.load_data('cards')
+        self.cards = {
+            card_data['title']: Card(
+                card_data,
+                # We only support NSG's ban list, so we only care about which
+                # cards are in the MWL, assume they are all banned.
+                is_banned=card_data['code'] in self.active_mwl['cards'],
+                # For rotation we need to look up the pack, then the cycle,
+                # then look at whether the cycle has rotated.
+                # FIXME: maybe we should just have a way to look up the pack &
+                # cycle from the Card, and figure out rotation and pack info
+                # from there.
+                has_rotated=self.cycles.get(
+                    self.packs.get(card_data['pack_code'], {}).get('cycle_code'), {}
+                ).get('rotated'),
+            )
+            for card_data in cards_data['data']
+        }
+
+    def load_data(self, type):
         # FIXME: add way to refresh local cache (for now just delete
         # data/cards.json before starting the bot).
-        filename = 'data/cards.json'
+        filename = f'data/{type}.json'
         try:
             with open(filename) as f:
-                print(f'Loading cards from {filename}...')
+                print(f'Loading {type} from {filename}...')
                 data = json.load(f)
-        except FileNotFoundError:
-            print('Loading cards from netrunnerdb...')
-            data = requests.get(f'{NRDB_API}public/cards').json()
-            with open(filename, 'w'):
+        except (FileNotFoundError, json.JSONDecodeError):
+            print(f'Loading {type} from netrunnerdb...')
+            data = requests.get(f'{NRDB_API}public/{type}').json()
+            with open(filename, 'w') as f:
                 json.dump(data, f)
-        self.cards = {x['title']: Card(x) for x in data['data']}
-        print('Loaded netrunnerdb data!')
+        print(f'Loaded netrunnerdb {type}!')
+        return data
 
     def lookup_card_by_title(self, value):
         print(f'Looking up {value}')
@@ -40,8 +67,13 @@ class Cards:
 
 
 class Card:
-    def __init__(self, data):
+    def __init__(self, data, *, is_banned=False, has_rotated=False):
         self.data = data
+        self.is_banned = is_banned
+        self.has_rotated = has_rotated
+
+    def __str__(self):
+        return self.data['stripped_title']
 
     def format(self):
         card = self.data
@@ -73,6 +105,11 @@ class Card:
             )
         )
 
+        if 'advancement_cost' in card and 'agenda_points' in card:
+            subtitles.append(
+                f'{card["advancement_cost"] or "X"} / {card["agenda_points"]}'
+            )
+
         faction_text = (
             card["faction_code"]
             .replace('-corp', '')
@@ -84,11 +121,10 @@ class Card:
                 f' {"●" * card["faction_cost"]}{"○" * (5 - card["faction_cost"])}'
             )
         subtitles.append(faction_text)
-
-        if 'advancement_cost' in card and 'agenda_points' in card:
-            subtitles.append(
-                f'{card["advancement_cost"] or "X"} / {card["agenda_points"]}'
-            )
+        if self.is_banned:
+            subtitles.append('Banned!')
+        if self.has_rotated:
+            subtitles.append('Rotated!')
 
         message = [
             title,
