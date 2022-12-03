@@ -75,9 +75,11 @@ class Card:
     def __str__(self):
         return self.data['stripped_title']
 
-    def format(self):
+    def __html__(self):
         card = self.data
-        title = f'**{card["stripped_title"]}** ({NRDB_CARD_URL_PREFIX}{card["code"]})'
+        title = (
+            f'<strong>{card["title"]}</strong> ({NRDB_CARD_URL_PREFIX}{card["code"]})'
+        )
         has_rez_cost = card['type_code'] in ['asset', 'upgrade', 'ice']
         subtitle = card["type_code"].capitalize()
         if 'keywords' in card:
@@ -128,7 +130,7 @@ class Card:
 
         message = [
             title,
-            f'**{" • ".join(subtitles)}**',
-            card['stripped_text'],
+            f'<strong>{" • ".join(subtitles)}</strong>',
+            f'<blockquote><p>{card["text"]}</p></blockquote>',
         ]
-        return '\n'.join(message)
+        return '\n'.join(message).replace('\n', '<br />')
