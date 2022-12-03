@@ -21,7 +21,7 @@ async def echo(room, message):
     match = botlib.MessageMatch(room, message, bot)
     if match.is_not_from_this_bot():
         for card in cards.cards_from_message(message.body):
-            await bot.api.send_text_message(room.room_id, card['stripped_text'])
+            await bot.api.send_markdown_message(room.room_id, card.format())
 
 
 bot.run()
