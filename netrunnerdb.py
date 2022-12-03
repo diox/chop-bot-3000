@@ -78,10 +78,11 @@ class Card:
     def __html__(self):
         card = self.data
         title = (
-            f'<strong>{card["title"]}</strong> ({NRDB_CARD_URL_PREFIX}{card["code"]})'
+            f'<strong>{"◆ " if card.get("uniqueness") else ""}'
+            f'{card["title"]}</strong> ({NRDB_CARD_URL_PREFIX}{card["code"]})'
         )
         has_rez_cost = card['type_code'] in ['asset', 'upgrade', 'ice']
-        subtitle = card["type_code"].capitalize()
+        subtitle = 'ICE' if card['type_code'] == 'ice' else card['type_code'].title()
         if 'keywords' in card:
             subtitle += f': {card["keywords"]}'
 
@@ -128,9 +129,23 @@ class Card:
         if self.has_rotated:
             subtitles.append('Rotated!')
 
+        replaces = {
+            '[click]': '🕗',
+            '[subroutine]': '↳',
+            '[link]': '🔗',
+            '[credit]': '🪙',
+            '[interrupt]': '⚡',
+            '[mu]': '🔋',
+            '[recurring-credit]': '🪙↻',
+            '[trash]': '🗑',
+        }
+        text = card['text']
+        for key, value in replaces.items():
+            text = text.replace(key, value)
+
         message = [
             title,
             f'<strong>{" • ".join(subtitles)}</strong>',
-            f'<blockquote><p>{card["text"]}</p></blockquote>',
+            f'<blockquote><p>{text}</p></blockquote>',
         ]
         return '\n'.join(message).replace('\n', '<br />')
