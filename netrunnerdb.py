@@ -1,9 +1,13 @@
+# Copyright (c) 2022 Mathieu Pillard, distributed under MIT License
 # Some logic in this file is copied from https://github.com/Mezuzi/Jeeves
-# MIT License
-# Copyright (c) 2020 Oliver Yin
+# which is Copyright (c) 2020 Oliver Yin, distributed under MIT License
 import json
 import re
 import requests
+import unicodedata
+
+from rapidfuzz import fuzz
+
 
 NRDB_API = 'https://netrunnerdb.com/api/2.0/'
 NRDB_CARD_URL_PREFIX = 'https://netrunnerdb.com/en/card/'
@@ -20,7 +24,7 @@ class Cards:
         self.cycles = {x['code']: x for x in self.load_data('cycles')['data']}
         cards_data = self.load_data('cards')
         self.cards = {
-            card_data['title']: Card(
+            self.normalize_text(card_data['title']): Card(
                 card_data,
                 # We only support NSG's ban list, so we only care about which
                 # cards are in the MWL, assume they are all banned.
@@ -53,14 +57,37 @@ class Cards:
         print(f'Loaded netrunnerdb {type}!')
         return data
 
+    def normalize_text(self, value):
+        return ''.join(
+            c
+            for c in unicodedata.normalize('NFKD', value)
+            if unicodedata.category(c) not in ('Mn', 'Cc')
+        ).lower()
+
+    def score_card(self, value, card_title):
+        # FIXME: aliases
+        if value == card_title:
+            return 200
+        else:
+            return fuzz.ratio(value, card_title) + (70 if value in card_title else 0)
+
+    def search_card(self, value):
+        normalized_value = self.normalize_text(value)
+        print(f'Searching for card "{value}" -> "{normalized_value}')
+        return self.cards.get(
+            max(
+                [*self.cards.keys()], key=lambda x: self.score_card(normalized_value, x)
+            )
+        )
+
     def lookup_card_by_title(self, value):
-        print(f'Looking up {value}')
-        return self.cards.get(value)
+        print(f'Looking up card "{value}"" by title')
+        return self.cards.get(self.normalize_text(value))
 
     def cards_from_message(self, body):
         results = re.findall(r'\[\[(.*?)\]\]', body)
         return (
-            filter(None, [self.lookup_card_by_title(value) for value in results])
+            filter(None, [self.search_card(value) for value in results])
             if results
             else []
         )
