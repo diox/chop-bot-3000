@@ -1,0 +1,7 @@
+[simplematrixbotlib.creds]
+homeserver = "https://matrix.example.org"
+username = "chop-bot-3000"
+password = "super sikret passw0rd"
+
+[simplematrixbotlib.config]
+join_on_invite = true
