@@ -73,7 +73,12 @@ class Card:
             )
         )
 
-        faction_text = card["faction_code"].capitalize()
+        faction_text = (
+            card["faction_code"]
+            .replace('-corp', '')
+            .replace('-runner', '')
+            .capitalize()
+        )
         if card.get('faction_cost'):
             faction_text += (
                 f' {"●" * card["faction_cost"]}{"○" * (5 - card["faction_cost"])}'
