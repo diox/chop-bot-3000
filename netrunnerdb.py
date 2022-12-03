@@ -73,11 +73,13 @@ class Card:
             )
         )
 
-        if 'faction_cost' in card:
-            subtitles.append(
-                f'Influence cost: '
-                f'{"●" * card["faction_cost"]}{"○" * (5 - card["faction_cost"])}'
+        faction_text = card["faction_code"].capitalize()
+        if card.get('faction_cost'):
+            faction_text += (
+                f' {"●" * card["faction_cost"]}{"○" * (5 - card["faction_cost"])}'
             )
+        subtitles.append(faction_text)
+
         if 'advancement_cost' in card and 'agenda_points' in card:
             subtitles.append(
                 f'{card["advancement_cost"] or "X"} / {card["agenda_points"]}'
