@@ -65,7 +65,6 @@ class Cards:
         ).lower()
 
     def score_card(self, value, card_title):
-        # FIXME: aliases
         if value == card_title:
             return 200
         else:
@@ -129,7 +128,7 @@ class Card:
 
         subtitles.extend(
             (
-                f'{pair[0]}: {card.get(pair[1], "X")}'
+                f'{pair[0]}: {card[pair[1]] if card[pair[1]] is not None else "X"}'
                 for pair in automatic_pairs
                 if pair[1] in card
             )
