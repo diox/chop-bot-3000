@@ -3,3 +3,4 @@ python-olm==3.1.3
 requests==2.28.1
 simplematrixbotlib==2.8.0
 toml==0.10.2
+rapidfuzz==2.13.3
