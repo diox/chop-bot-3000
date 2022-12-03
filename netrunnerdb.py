@@ -113,12 +113,23 @@ class Card:
                 f'{card["advancement_cost"] or "X"} / {card["agenda_points"]}'
             )
 
-        faction_text = (
-            card["faction_code"]
-            .replace('-corp', '')
-            .replace('-runner', '')
-            .capitalize()
-        )
+        faction_colors = {
+            'anarch': 'orangered',
+            'criminal': 'royalblue',
+            'shaper': 'limegreen',
+            'neutral': 'gray',
+            'adam': 'olive',
+            'sunny-lebeau': 'lightslategray',
+            'apex': 'red',
+            'weyland-consortium': 'darkgreen',
+            'nbn': 'darkorange',
+            'haas-bioroid': 'blueviolet',
+            'jinteki': 'crimson',
+        }
+        faction_code = card["faction_code"].replace('-corp', '').replace('-runner', '')
+        faction_color = faction_colors.get(faction_code, '')
+        faction_title = 'NBN' if faction_code == 'nbn' else faction_code.title()
+        faction_text = f'<font color="{faction_color}">{faction_title}</font>'
         if card.get('faction_cost'):
             faction_text += (
                 f' {"●" * card["faction_cost"]}{"○" * (5 - card["faction_cost"])}'
