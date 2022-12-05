@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+import asyncio
 import simplematrixbotlib as botlib
+import time
 import toml
 
 from netrunnerdb import Cards
@@ -25,4 +27,10 @@ async def echo(room, message):
             await bot.api.send_html_message(room.room_id, card.__html__())
 
 
-bot.run()
+while True:
+    try:
+        print('Starting bot...')
+        bot.run()
+    except asyncio.exceptions.TimeoutError:
+        print('Caught a TimeoutError, sleeping for one sec then restarting...')
+        time.sleep(1)
