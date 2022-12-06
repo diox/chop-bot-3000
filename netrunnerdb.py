@@ -58,11 +58,15 @@ class Cards:
         return data
 
     def normalize_text(self, value):
-        return ''.join(
-            c
-            for c in unicodedata.normalize('NFKD', value)
-            if unicodedata.category(c) not in ('Mn', 'Cc')
-        ).lower()
+        return (
+            ''.join(
+                c
+                for c in unicodedata.normalize('NFKD', value)
+                if unicodedata.category(c) not in ('Mn', 'Cc')
+            )
+            .lower()
+            .strip()
+        )
 
     def score_card(self, value, card_title):
         if value == card_title:
@@ -72,11 +76,16 @@ class Cards:
 
     def search_card(self, value):
         normalized_value = self.normalize_text(value)
-        print(f'Searching for card "{value}" -> "{normalized_value}')
-        return self.cards.get(
-            max(
-                [*self.cards.keys()], key=lambda x: self.score_card(normalized_value, x)
+        print(f'Searching for card "{value}" -> "{normalized_value}"')
+        return (
+            self.cards.get(
+                max(
+                    [*self.cards.keys()],
+                    key=lambda x: self.score_card(normalized_value, x),
+                )
             )
+            if normalized_value
+            else None
         )
 
     def lookup_card_by_title(self, value):
