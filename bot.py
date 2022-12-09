@@ -20,11 +20,15 @@ bot = BotWithHTML(creds, config)
 
 
 @bot.listener.on_message_event
-async def echo(room, message):
+async def card_lookup(room, message):
     match = botlib.MessageMatch(room, message, bot)
     if match.is_not_from_this_bot():
+        tasks = []
         for card in cards.cards_from_message(message.body):
-            await bot.api.send_html_message(room.room_id, card.__html__())
+            print(f'Found {card}, sending message to {room.room_id}')
+            tasks.append(bot.api.send_html_message(room.room_id, card.__html__()))
+        if tasks:
+            await asyncio.gather(*tasks)
 
 
 while True:
