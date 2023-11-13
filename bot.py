@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
 import asyncio
-import simplematrixbotlib as botlib
 import time
-import toml
 
-from netrunnerdb import Cards
+import simplematrixbotlib as botlib
+import toml
 from fancier_bot import BotWithHTML
+from netrunnerdb import Cards
+
 
 creds_data = toml.load('config.toml').get('simplematrixbotlib', {}).get('creds', {})
 creds = botlib.Creds(
     creds_data['homeserver'], creds_data['username'], creds_data['password']
 )
 config = botlib.Config()
-config.load_toml("config.toml")
+config.load_toml('config.toml')
 
 cards = Cards()
 bot = BotWithHTML(creds, config)

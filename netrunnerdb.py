@@ -3,9 +3,9 @@
 # which is Copyright (c) 2020 Oliver Yin, distributed under MIT License
 import json
 import re
-import requests
 import unicodedata
 
+import requests
 from rapidfuzz import fuzz
 
 
@@ -161,7 +161,7 @@ class Card:
             'haas-bioroid': 'blueviolet',
             'jinteki': 'crimson',
         }
-        faction_code = card["faction_code"].replace('-corp', '').replace('-runner', '')
+        faction_code = card['faction_code'].replace('-corp', '').replace('-runner', '')
         faction_color = faction_colors.get(faction_code, '')
         faction_title = 'NBN' if faction_code == 'nbn' else faction_code.title()
         faction_text = f'<font color="{faction_color}">{faction_title}</font>'

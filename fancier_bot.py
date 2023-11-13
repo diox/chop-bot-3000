@@ -6,10 +6,10 @@ class ApiWithHTML(botlib.Api):
         await self._send_room(
             room_id=room_id,
             content={
-                "msgtype": msgtype,
-                "body": message,
-                "format": "org.matrix.custom.html",
-                "formatted_body": message,
+                'msgtype': msgtype,
+                'body': message,
+                'format': 'org.matrix.custom.html',
+                'formatted_body': message,
             },
         )
 
